@@ -1,4 +1,4 @@
 *.in
 *.out
 .vscode
-.laboratorio*
+*swp
