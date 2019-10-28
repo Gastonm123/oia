@@ -7,7 +7,7 @@
 
 using namespace std;
 
-const int MAXN = 2e5;
+const int MAXN = 2e5 + 5;
 int n, m;
 bool miMapa[MAXN];
 int set[MAXN];
@@ -28,6 +28,9 @@ int find_set(int a) {
 int areas_accesible = 0;
 
 void union_set(int a, int b) {
+	a++;
+	b++;
+
 	a = find_set(a);
 	b = find_set(b);
 
@@ -48,85 +51,18 @@ vector<int> laboratorio(vector<string> mapa, vector<int> perrosF, vector<int> pe
 	n = mapa.size();
 	m = mapa[0].size();
 
-	if (n == 1) {
-		int anterior = 0;
-		int inicio = -1;
-		int fin = m-1;
-		int izquierda = 0;
-		int derecha = m-1;
-
-		forn (i, 0, m) {
-			if (mapa[0][i] == '#' && inicio == -1)
-				izquierda = i;	
-			if (mapa[0][i] == '#' && inicio != -1)
-				derecha = i;
-
-			if (inicio == -1 && mapa[0][i] == 'E')
-				inicio = i;
-			if (i < m-1 && mapa[0][i] == 'E' && mapa[0][i+1] != 'E')
-				fin = i;
-		}
-
-		inicio = max(inicio, 0);
-
-		int ans = derecha - izquierda - 1;
-		int p = perrosC.size();
-		vector<int> respuestas;
-
-		forn (i, 0, p) {
-			int col = perrosC[i];
-			mapa[0][col] = 'P';
-
-			while (mapa[0][inicio] != 'E' && inicio <= fin)
-				inicio++;
-
-			while (mapa[0][fin] != 'E' && inicio <= fin)
-				fin--;
-
-			if (inicio > fin) {
-				respuestas.push_back(0);
-				continue;
-			}
-
-			if (col > inicio && col < fin) {
-				ans--;
-			} else if (col > izquierda && col <= inicio) {
-				ans -= (col - izquierda);
-				izquierda = col;
-			} else if (col < derecha && col >= fin) {
-				derecha = col;
-				ans -= (derecha - col); 
-			}
-
-			respuestas.push_back(ans);
-		}
-
-		return respuestas;
-	}
-
 	forn (i, 0, n) {
 		forn (j, 0, m) {
 			int index = i*m+j;
 			set[index] = index;
 			size[index] = 1;
+
+			miMapa[index] = (mapa[i][j] != '#'); 
 		}
 	}
 
-	int entrada; bool hayEntrada = false;
-	vector<pair<int, int> > entradas;
-	int nro_entradas = 0;
-	
-	forn (i, 0, n) {
-		forn (j, 0, m) {
-			int index = i*m+j;
-
-			miMapa[index] = (mapa[i][j] != '#');
-			if (mapa[i][j] == 'E') {
-				entradas.push_back(make_pair(i, j));	
-				nro_entradas++;
-			}
-		}
-	}
+	set[n*m] = n*m;
+	size[n*m] = 1;
 
 	int p;
 	p = perrosF.size();
@@ -147,6 +83,10 @@ vector<int> laboratorio(vector<string> mapa, vector<int> perrosF, vector<int> pe
 			int index = i*m+j;
 
 			if (miMapa[index]) {
+				if (mapa[i][j] == 'E') {
+					union_set(-1, index);
+				}
+
 				if (i < n-1 && miMapa[(i+1)*m+j]) {
 					union_set(index, (i+1)*m+j);
 				}
@@ -161,34 +101,26 @@ vector<int> laboratorio(vector<string> mapa, vector<int> perrosF, vector<int> pe
 	vector<int> resultados;
 	int dx[] = {0, 1, 0, -1};
 	int dy[] = {1, 0, -1, 0};
-	bitset<MAXN> contados;
+
+	forn (i, 0, n) {
+		forn (j, 0, m) {
+			cout << set[i*m+j] << " ";
+		}
+		cout << endl;
+	}
 
 	forn (i, 0, p) {
 		int fila = perrosF[i];
 		int columna = perrosC[i];
 		int index = fila*m+columna;
  
-		int areas_accesibles = 0;
-	
-		for (auto pos : entradas) {
-			int index_entrada = pos.first*m+pos.second;
-			int set_entrada = find_set(index_entrada);
-
-			if (contados[set_entrada]) 
-				continue;
-
-			if (miMapa[index_entrada]) {
-				areas_accesibles += size[set_entrada];
-				contados[set_entrada] = true;
-			}
-		}
-		
-		contados.reset();
-
-		resultados.push_back(areas_accesibles);
+		resultados.push_back(size[find_set(0)]-1);
 
 		// saco un perro
 		miMapa[index] = true;
+
+		if (mapa[fila][columna] == 'E')
+			union_set(-1, index);
 
 		forn (j, 0, 4) {
 			int new_fila = fila + dy[j];	
