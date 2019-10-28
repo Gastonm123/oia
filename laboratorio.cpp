@@ -43,10 +43,66 @@ void union_set(int a, int b) {
 	size[b] = 0;
 }
 
-
+#include <iostream>
 vector<int> laboratorio(vector<string> mapa, vector<int> perrosF, vector<int> perrosC) {
 	n = mapa.size();
 	m = mapa[0].size();
+
+	if (n == 1) {
+		int anterior = 0;
+		int inicio = -1;
+		int fin = m-1;
+		int izquierda = 0;
+		int derecha = m-1;
+
+		forn (i, 0, m) {
+			if (mapa[0][i] == '#' && inicio == -1)
+				izquierda = i;	
+			if (mapa[0][i] == '#' && inicio != -1)
+				derecha = i;
+
+			if (inicio == -1 && mapa[0][i] == 'E')
+				inicio = i;
+			if (i < m-1 && mapa[0][i] == 'E' && mapa[0][i+1] != 'E')
+				fin = i;
+		}
+
+		inicio = max(inicio, 0);
+
+		int ans = derecha - izquierda - 1;
+		int p = perrosC.size();
+		vector<int> respuestas;
+
+		forn (i, 0, p) {
+			int col = perrosC[i];
+			mapa[0][col] = 'P';
+
+			while (mapa[0][inicio] != 'E' && inicio <= fin)
+				inicio++;
+
+			while (mapa[0][fin] != 'E' && inicio <= fin)
+				fin--;
+
+			if (inicio > fin) {
+				respuestas.push_back(0);
+				continue;
+			}
+
+			if (col > inicio && col < fin) {
+				ans--;
+			} else if (col > izquierda && col <= inicio) {
+				ans -= (col - izquierda);
+				izquierda = col;
+			} else if (col < derecha && col >= fin) {
+				derecha = col;
+				ans -= (derecha - col); 
+			}
+
+			respuestas.push_back(ans);
+		}
+
+		return respuestas;
+	}
 
 	forn (i, 0, n) {
 		forn (j, 0, m) {
@@ -153,36 +209,36 @@ vector<int> laboratorio(vector<string> mapa, vector<int> perrosF, vector<int> pe
 	return resultados;
 }
 
-#ifndef SERVIDOR
-	#include <iostream>	
-	#include <vector>
-	int main() {
-		int n, m, p;
-		cin >> n >> m >> p;
+#include <iostream>	
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+	int n, m, p;
+	cin >> n >> m >> p;
 
-		vector<string> mapa(n);
+	vector<string> mapa(n);
 
-		for(int i=0; i<n; i++) {
-			string in;
-			cin >> in;
-			mapa[i] = in;
-		}
-
-		vector<int> perrosF(p);
-		vector<int> perrosC(p);
-		
-		for(int i=0; i<p; i++) {
-			int fila, col;
-			cin >> fila >> col;
-			perrosF[i] = fila;
-			perrosC[i] = col;
-		}
-
-		auto result = laboratorio(mapa, perrosF, perrosC);
-
-		for (int query : result) {
-			cout << query << " ";
-		}
-		cout << endl;
+	for(int i=0; i<n; i++) {
+		string in;
+		cin >> in;
+		mapa[i] = in;
 	}
-#endif
+
+	vector<int> perrosF(p);
+	vector<int> perrosC(p);
+	
+	for(int i=0; i<p; i++) {
+		int fila, col;
+		cin >> fila >> col;
+		perrosF[i] = fila;
+		perrosC[i] = col;
+	}
+
+	auto result = laboratorio(mapa, perrosF, perrosC);
+
+	for (int query : result) {
+		cout << query << " ";
+	}
+	cout << endl;
+}
