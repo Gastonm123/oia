@@ -12,6 +12,12 @@ Este es un problema del nacional del 2019, Nivel 3 Problema 2.
 
 En resumen en el problema se pasa un mapa estilo laberinto con _"paredes"_ y _entradas_; y se pide que a medida que se ingresan nuevos _obstaculos_ al mapa se digan a cuantos lugares se puede llegar.
 
+#### Detalle de implementacion
+
+Devido a la tecnica usada para recorrer el tiempo en forma inversa, en el peor caso se tienen varias componentes conexas al principio del algoritmo y se deben optimizar su analisis para evitar ir una por una que terminaria resultando en una complejidad de O(MxNxP)
+
+Para evitar esto se usa el mismo union find pero uniendo ademas cada set a un set 0, que nos sirve como set globalizador y de donde podemos saber la suma de todas las componentes conexas en todo momento de forma rapida.
+
 ### Mesadas
 
 Este problema se puede encontrar en el _juez_ de la _OIA_.
